@@ -11,13 +11,6 @@ pipeline {
         stage('Checkout') {
             steps {
                 git branch: "${env.BRANCH_NAME}", url: 'https://github.com/LisandroLuna/simple-nodejs.git'
-                dir("${env.WORKSPACE}") {
-                snykSecurity(
-                    snykInstallation: 'snyk',
-                    snykTokenId: 'snyk-token',
-                    failOnIssues: true,
-                )
-                }
             }
         }
 
@@ -50,26 +43,6 @@ pipeline {
                             sh "sudo docker tag ${DOCKER_IMAGE_NAME}:${env.BRANCH_NAME}-${env.BUILD_NUMBER} ${DOCKER_IMAGE_NAME}:latest"
                             sh "sudo docker push ${DOCKER_IMAGE_NAME}:latest"
                         }
-                    }
-                }
-            }
-        }
-
-        stage('Deploy') {
-            when {
-                branch 'main'
-            }
-            steps {
-                script {
-                    withCredentials([sshUserPrivateKey(credentialsId: 'deploy-ssh-key', keyFileVariable: 'SSH_KEY')]) {
-                        sh """
-                            ssh -o StrictHostKeyChecking=no -i ${SSH_KEY} ${DEPLOY_USER}@${DEPLOY_SERVER} bash -c '
-                                docker pull ${DOCKER_IMAGE_NAME}:${env.BRANCH_NAME}-${env.BUILD_NUMBER}
-                                docker stop simple-nodejs || true
-                                docker rm simple-nodejs || true
-                                docker run -d --name simple-nodejs -p 3000:3000 ${DOCKER_IMAGE_NAME}:${env.BRANCH_NAME}-${env.BUILD_NUMBER}
-                            '
-                        """
                     }
                 }
             }
