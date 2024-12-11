@@ -22,16 +22,6 @@ pipeline {
                 ]]) {
                     sh '''
                     aws --version
-                    if ! command -v aws &> /dev/null
-                    then
-                        echo "AWS CLI not found. Installing..."
-                        curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-                        unzip awscliv2.zip
-                        sudo ./aws/install
-                    else
-                        echo "AWS CLI is already installed."
-                    fi
-                    aws --version
                     aws ecr get-login-password --region $AWS_REGION | \
                     docker login --username AWS --password-stdin $(aws sts get-caller-identity --query Account --output text).dkr.ecr.$AWS_REGION.amazonaws.com
                     '''
