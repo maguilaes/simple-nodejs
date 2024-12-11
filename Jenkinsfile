@@ -44,19 +44,25 @@ pipeline {
         }
 
         stage('Tag Docker Image') {
-            steps {
-                sh '''
+            steps {withCredentials([[
+                    $class: 'AmazonWebServicesCredentialsBinding',
+                    credentialsId: 'aws-credentials-id' // Use your AWS credentials ID
+                ]]) 
+              {  sh '''
                 ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
                 docker tag $ECR_REPO_NAME:$IMAGE_TAG $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO_NAME:${env.BRANCH_NAME}-${env.BUILD_NUMBER}
-                '''
+                '''}
             }
         }
         stage('Push to AWS ECR') {
-            steps {
-                sh '''
+            steps {withCredentials([[
+                    $class: 'AmazonWebServicesCredentialsBinding',
+                    credentialsId: 'aws-credentials-id' // Use your AWS credentials ID
+                ]]) 
+                {sh '''
                 ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
                 docker push $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO_NAME:${env.BRANCH_NAME}-${env.BUILD_NUMBER}
-                '''
+                '''}
             }
         }
     }
