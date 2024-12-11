@@ -15,12 +15,13 @@ pipeline {
         }
 
         stage('Login to AWS ECR') {
-            steps {
+            steps { 
                 withCredentials([[
                     $class: 'AmazonWebServicesCredentialsBinding',
                     credentialsId: 'aws-credentials-id' // Use your AWS credentials ID
                 ]]) {
                     sh '''
+                    aws --version
                     if ! command -v aws &> /dev/null
                     then
                         echo "AWS CLI not found. Installing..."
