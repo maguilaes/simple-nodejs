@@ -3,14 +3,31 @@ pipeline {
 
     environment {
         DOCKER_IMAGE_NAME = "lisandrodev/simple-nodejs"
-        DEPLOY_SERVER = "192.168.0.5"
-        DEPLOY_USER = "lisandro"
+        AWS_REGION = 'us-east-1' // Set your AWS region
+        ECR_REPO_NAME = 'simplejs-app' // Set your ECR repo name
     }
 
     stages {
         stage('Checkout') {
             steps {
                 git branch: "${env.BRANCH_NAME}", url: 'https://github.com/LisandroLuna/simple-nodejs.git'
+            }
+        }
+
+        stage('Login to AWS ECR') {
+            steps {
+                withCredentials([[
+                    $class: 'AmazonWebServicesCredentialsBinding',
+                    credentialsId: 'aws-credentials-id' // Use your AWS credentials ID
+                ]]) {
+                    sh '''
+                    curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+                    unzip awscliv2.zip
+                    sudo ./aws/install
+                    aws ecr get-login-password --region $AWS_REGION | \
+                    docker login --username AWS --password-stdin $(aws sts get-caller-identity --query Account --output text).dkr.ecr.$AWS_REGION.amazonaws.com
+                    '''
+                }
             }
         }
 
