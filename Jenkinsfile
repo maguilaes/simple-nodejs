@@ -33,35 +33,32 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', passwordVariable: 'DOCKER_HUB_PASSWORD', usernameVariable: 'DOCKER_HUB_USERNAME')]) {
-                    sh "echo ${DOCKER_HUB_PASSWORD} | sudo docker login -u ${DOCKER_HUB_USERNAME} --password-stdin"
-                    sh "sudo docker build -t ${DOCKER_IMAGE_NAME}:${env.BRANCH_NAME}-${env.BUILD_NUMBER} ."
-                }
+                sh "sudo docker build -t ${ECR_REPO_NAME}:${env.BRANCH_NAME}-${env.BUILD_NUMBER} ."
             }
         }
 
         stage('Test') {
             steps {
                 script {
-                    sh "sudo docker run --rm ${DOCKER_IMAGE_NAME}:${env.BRANCH_NAME}-${env.BUILD_NUMBER} npm test"
+                    sh "sudo docker run --rm ${ECR_REPO_NAME}:${env.BRANCH_NAME}-${env.BUILD_NUMBER} npm test"
                 }
             }
         }
 
-        stage('Push Docker Image') {
+        stage('Tag Docker Image') {
             steps {
-                script {
-                    withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', passwordVariable: 'DOCKER_HUB_PASSWORD', usernameVariable: 'DOCKER_HUB_USERNAME')]) {
-                        sh "echo ${DOCKER_HUB_PASSWORD} | sudo docker login -u ${DOCKER_HUB_USERNAME} --password-stdin"
-                        sh "sudo docker push ${DOCKER_IMAGE_NAME}:${env.BRANCH_NAME}-${env.BUILD_NUMBER}"
-                        
-                        // Tag as latest only if on the main branch
-                        if (env.BRANCH_NAME == 'main') {
-                            sh "sudo docker tag ${DOCKER_IMAGE_NAME}:${env.BRANCH_NAME}-${env.BUILD_NUMBER} ${DOCKER_IMAGE_NAME}:latest"
-                            sh "sudo docker push ${DOCKER_IMAGE_NAME}:latest"
-                        }
-                    }
-                }
+                sh '''
+                ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+                docker tag $ECR_REPO_NAME:$IMAGE_TAG $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO_NAME:${env.BRANCH_NAME}-${env.BUILD_NUMBER}
+                '''
+            }
+        }
+        stage('Push to AWS ECR') {
+            steps {
+                sh '''
+                ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+                docker push $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO_NAME:${env.BRANCH_NAME}-${env.BUILD_NUMBER}
+                '''
             }
         }
     }
