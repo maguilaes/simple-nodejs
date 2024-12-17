@@ -3,6 +3,7 @@ pipeline {
 
     environment {
         DOCKER_IMAGE_NAME = "lisandrodev/simple-nodejs"
+        IMAGE_TAG = "simple-nodejs"
         AWS_REGION = 'us-east-1' // Set your AWS region
         ECR_REPO_NAME = 'simplejs-app' // Set your ECR repo name
         ACCOUNT_ID='841162685303'
