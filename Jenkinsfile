@@ -10,21 +10,6 @@ pipeline {
     }
 
     stages {
-        stage('Add User to Docker Group') {
-            steps {
-                script {
-                    // Add user to 'docker' group
-                    sh '''
-                    sudo usermod -aG docker $(whoami)
-                    echo "User added to docker group"
-                    
-                    
-                    # Reload group membership for the docker group
-                    sg docker -c "echo 'Docker group reloaded successfully'"
-                    '''
-                }
-            }
-        }
         stage('Checkout') {
             steps {
                 git branch: "${env.BRANCH_NAME}", url: 'https://github.com/LisandroLuna/simple-nodejs.git'
@@ -48,14 +33,14 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                sh "docker build -t ${ECR_REPO_NAME}:${env.BRANCH_NAME}-${env.BUILD_NUMBER} ."
+                sh "sudo docker build -t ${ECR_REPO_NAME}:${env.BRANCH_NAME}-${env.BUILD_NUMBER} ."
             }
         }
 
         stage('Test') {
             steps {
                 script {
-                    sh "docker run --rm ${ECR_REPO_NAME}:${env.BRANCH_NAME}-${env.BUILD_NUMBER} npm test"
+                    sh "sudo docker run --rm ${ECR_REPO_NAME}:${env.BRANCH_NAME}-${env.BUILD_NUMBER} npm test"
                 }
             }
         }
@@ -78,7 +63,7 @@ pipeline {
                     credentialsId: 'aws-credentials-id' // Use your AWS credentials ID
                 ]]) 
                 {
-                    sh "docker push ${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO_NAME}:${env.BRANCH_NAME}-${env.BUILD_NUMBER}"
+                    sh "sudo docker push ${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO_NAME}:${env.BRANCH_NAME}-${env.BUILD_NUMBER}"
                 }
             }
         }
@@ -88,7 +73,7 @@ pipeline {
         always {
             script {
                 try {
-                    sh "docker rmi ${ECR_REPO_NAME}:${IMAGE_TAG}-${env.BUILD_NUMBER}"
+                    sh "sudo docker rmi ${ECR_REPO_NAME}:${IMAGE_TAG}-${env.BUILD_NUMBER}"
                 } catch (Exception e) {
                     echo 'Failed to remove Docker image.'
                 }
