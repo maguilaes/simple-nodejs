@@ -2,8 +2,6 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE_NAME = "lisandrodev/simple-nodejs"
-        IMAGE_TAG = "simple-nodejs"
         AWS_REGION = 'us-east-1' // Set your AWS region
         ECR_REPO_NAME = 'simplejs-app' // Set your ECR repo name
         ACCOUNT_ID='841162685303'
@@ -52,7 +50,7 @@ pipeline {
                     credentialsId: 'aws-credentials-id' // Use your AWS credentials ID
                 ]]) 
                 {  
-                    sh "sudo docker tag ${ECR_REPO_NAME}:${IMAGE_TAG} ${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO_NAME}:${env.BRANCH_NAME}-${env.BUILD_NUMBER}"
+                    sh "sudo docker tag ${ECR_REPO_NAME}:${env.BRANCH_NAME}-${env.BUILD_NUMBER} ${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO_NAME}:${env.BRANCH_NAME}-${env.BUILD_NUMBER}"
                 }
             }
         }
