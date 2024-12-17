@@ -52,7 +52,7 @@ pipeline {
                     credentialsId: 'aws-credentials-id' // Use your AWS credentials ID
                 ]]) 
                 {  
-                    sh "docker tag $ECR_REPO_NAME:$IMAGE_TAG $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO_NAME:${env.BRANCH_NAME}-${env.BUILD_NUMBER}"
+                    sh "docker tag ${ECR_REPO_NAME}:${IMAGE_TAG} ${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO_NAME}:${env.BRANCH_NAME}-${env.BUILD_NUMBER}"
                 }
             }
         }
@@ -63,7 +63,7 @@ pipeline {
                     credentialsId: 'aws-credentials-id' // Use your AWS credentials ID
                 ]]) 
                 {
-                    sh "docker push $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO_NAME:${env.BRANCH_NAME}-${env.BUILD_NUMBER}"
+                    sh "docker push ${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO_NAME}:${env.BRANCH_NAME}-${env.BUILD_NUMBER}"
                 }
             }
         }
@@ -73,7 +73,7 @@ pipeline {
         always {
             script {
                 try {
-                    sh "sudo docker rmi ${DOCKER_IMAGE_NAME}:${env.BRANCH_NAME}-${env.BUILD_NUMBER}"
+                    sh "sudo docker rmi ${ECR_REPO_NAME}:${IMAGE_TAG}-${env.BUILD_NUMBER}"
                 } catch (Exception e) {
                     echo 'Failed to remove Docker image.'
                 }
