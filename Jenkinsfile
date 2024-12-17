@@ -5,6 +5,7 @@ pipeline {
         DOCKER_IMAGE_NAME = "lisandrodev/simple-nodejs"
         AWS_REGION = 'us-east-1' // Set your AWS region
         ECR_REPO_NAME = 'simplejs-app' // Set your ECR repo name
+        ACCOUNT_ID='841162685303'
     }
 
     stages {
@@ -62,7 +63,6 @@ pipeline {
                     credentialsId: 'aws-credentials-id' // Use your AWS credentials ID
                 ]]) 
                 {
-                    sh "ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)"
                     sh "docker push $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO_NAME:${env.BRANCH_NAME}-${env.BUILD_NUMBER}"
                 }
             }
