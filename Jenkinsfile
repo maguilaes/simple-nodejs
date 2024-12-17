@@ -14,21 +14,6 @@ pipeline {
             }
         }
 
-        stage('Login to AWS ECR') {
-            steps { 
-                withCredentials([[
-                    $class: 'AmazonWebServicesCredentialsBinding',
-                    credentialsId: 'aws-credentials-id' // Use your AWS credentials ID
-                ]]) {
-                    sh '''
-                    aws --version
-                    aws ecr get-login-password --region $AWS_REGION | \
-                    docker login --username AWS --password-stdin $(aws sts get-caller-identity --query Account --output text).dkr.ecr.$AWS_REGION.amazonaws.com
-                    '''
-                }
-            }
-        }
-
         stage('Build Docker Image') {
             steps {
                 sh "sudo docker build -t ${ECR_REPO_NAME}:${env.BRANCH_NAME}-${env.BUILD_NUMBER} ."
@@ -61,7 +46,14 @@ pipeline {
                     credentialsId: 'aws-credentials-id' // Use your AWS credentials ID
                 ]]) 
                 {
-                    sh "sudo docker push ${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO_NAME}:${env.BRANCH_NAME}-${env.BUILD_NUMBER}"
+                    // Log in to AWS ECR
+                    sh """
+                        aws ecr get-login-password --region ${AWS_REGION} | \
+                        sudo docker login --username AWS --password-stdin ${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
+                    """
+
+                    // Push the Docker image
+                    sh "sudo docker push ${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO_NAME}:${env.BRANCH_NAME}-${env.BUILD_NUMBER}"        
                 }
             }
         }
