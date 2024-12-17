@@ -15,7 +15,7 @@ pipeline {
                 script {
                     // Add user to 'docker' group
                     sh '''
-                    usermod -aG docker $(whoami)
+                    sudo usermod -aG docker $(whoami)
                     echo "User added to docker group"
 
                     # Reload group memberships without logging out
