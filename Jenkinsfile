@@ -17,11 +17,11 @@ pipeline {
                     sh '''
                     sudo usermod -aG docker $(whoami)
                     echo "User added to docker group"
-
-                    # Reload group memberships without logging out
-                    newgrp docker <<EOF
-                    echo "Docker group reloaded successfully"
-                    EOF
+                    
+                    # Reload group membership for docker group
+                    sudo su - $(whoami) -c "newgrp docker << 'EOC'
+                    echo 'Docker group reloaded successfully'
+                    EOC"
                     '''
                 }
             }
