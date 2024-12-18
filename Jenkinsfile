@@ -5,6 +5,8 @@ pipeline {
         AWS_REGION = 'us-east-1' // Set your AWS region
         ECR_REPO_NAME = 'simplejs-app' // Set your ECR repo name
         ACCOUNT_ID='841162685303'
+        DEPLOY_SERVER="34.230.73.120"
+        DEPLOY_USER="ubuntu"
     }
 
     stages {
