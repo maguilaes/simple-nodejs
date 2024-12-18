@@ -59,7 +59,7 @@ pipeline {
                 }
             }
         }
-
+ 
         stage('Deploy') {
             when {
                 branch 'test'
