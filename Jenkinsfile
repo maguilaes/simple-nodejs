@@ -69,10 +69,10 @@ pipeline {
                     withCredentials([sshUserPrivateKey(credentialsId: 'ubuntu-aws', keyFileVariable: 'SSH_KEY')]) {
                         sh """
                             ssh -o StrictHostKeyChecking=no -i ${SSH_KEY} ${DEPLOY_USER}@${DEPLOY_SERVER}
-                                docker pull ${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO_NAME}:${env.BRANCH_NAME}-${env.BUILD_NUMBER}
-                                docker stop simple-nodejs || true
-                                docker rm simple-nodejs || true
-                                docker run -d --name simple-nodejs -p 3000:3000 ${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO_NAME}:${env.BRANCH_NAME}-${env.BUILD_NUMBER} 
+                                sudo docker pull ${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO_NAME}:${env.BRANCH_NAME}-${env.BUILD_NUMBER}
+                                sudo docker stop simple-nodejs || true
+                                sudo docker rm simple-nodejs || true
+                                sudo docker run -d --name simple-nodejs -p 3000:3000 ${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO_NAME}:${env.BRANCH_NAME}-${env.BUILD_NUMBER} 
                         """
                     }
                 }
