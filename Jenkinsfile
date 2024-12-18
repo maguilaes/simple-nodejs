@@ -68,8 +68,8 @@ pipeline {
                 script {
                     withCredentials([sshUserPrivateKey(credentialsId: 'ubuntu-aws', keyFileVariable: 'SSH_KEY')]) {
                         sh """
-                            cat ${SSH_KEY} > LOGIN.pem
-                            chmod 400 LOGIN.pem
+                            sudo cat ${SSH_KEY} > LOGIN.pem
+                            sudo chmod 400 LOGIN.pem
                             ssh -o StrictHostKeyChecking=no -i LOGIN.pem ${DEPLOY_USER}@${DEPLOY_SERVER}'
                                 docker pull ${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO_NAME}:${env.BRANCH_NAME}-${env.BUILD_NUMBER}"  
                                 docker stop simple-nodejs || true
