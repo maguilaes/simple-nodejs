@@ -64,7 +64,7 @@ pipeline {
             when {
                 branch 'test'
             }
-            steps {
+            steps { 
                 script {
                     withCredentials([sshUserPrivateKey(credentialsId: 'ubuntu-aws', keyFileVariable: 'SSH_KEY')]) {
                         sh """
