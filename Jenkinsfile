@@ -57,6 +57,26 @@ pipeline {
                 }
             }
         }
+
+        stage('Deploy') {
+            when {
+                branch 'test'
+            }
+            steps {
+                script {
+                    withCredentials([sshUserPrivateKey(credentialsId: 'ubuntu-aws', keyFileVariable: 'SSH_KEY')]) {
+                        sh """
+                            ssh -o StrictHostKeyChecking=no -i ${SSH_KEY} ${DEPLOY_USER}@${DEPLOY_SERVER} bash -c '
+                                docker pull ${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO_NAME}:${env.BRANCH_NAME}-${env.BUILD_NUMBER}"  
+                                docker stop simple-nodejs || true
+                                docker rm simple-nodejs || true
+                                docker run -d --name simple-nodejs -p 3000:3000 ${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO_NAME}:${env.BRANCH_NAME}-${env.BUILD_NUMBER}"  
+                            '
+                        """
+                    }
+                }
+            }
+        }
     }
 
     post {
