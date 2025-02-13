@@ -28,7 +28,7 @@ pipeline {
             }
         }
 
-        stage('Push Docker Image') {
+        stage('Tag Docker Image') {
             steps {
                 script {
                     withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', passwordVariable: 'DOCKER_HUB_PASSWORD', usernameVariable: 'DOCKER_HUB_USERNAME')]) {
@@ -38,9 +38,9 @@ pipeline {
                         sh "docker push ${DOCKER_IMAGE_NAME}:${env.BRANCH_NAME}-latest"
                     }
                 }
-            }
+            } 
         }
-    }
+    }   
 
     post {
         always {
