@@ -2,11 +2,7 @@ pipeline {
     agent any
 
     environment {
-        AWS_REGION = 'us-east-1' // Set your AWS region
-        ECR_REPO_NAME = 'simplejs-app' // Set your ECR repo name
-        ACCOUNT_ID='841162685303'
-        DEPLOY_SERVER="34.230.73.120"
-        DEPLOY_USER="ubuntu"
+        DOCKER_IMAGE_NAME = "lisandrodev/simple-nodejs"
     }
 
     stages {
@@ -18,61 +14,28 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                sh "sudo docker build -t ${ECR_REPO_NAME}:${env.BRANCH_NAME}-${env.BUILD_NUMBER} ."
+                script {
+                    sh "docker build -t ${DOCKER_IMAGE_NAME}:${env.BRANCH_NAME}-${env.BUILD_NUMBER} ."
+                }
             }
         }
 
         stage('Test') {
             steps {
                 script {
-                    sh "sudo docker run --rm ${ECR_REPO_NAME}:${env.BRANCH_NAME}-${env.BUILD_NUMBER} npm test"
+                    sh "docker run --rm ${DOCKER_IMAGE_NAME}:${env.BRANCH_NAME}-${env.BUILD_NUMBER} npm test"
                 }
             }
         }
 
         stage('Tag Docker Image') {
             steps {
-                withCredentials([[
-                    $class: 'AmazonWebServicesCredentialsBinding',
-                    credentialsId: 'aws-credentials-id' // Use your AWS credentials ID
-                ]]) 
-                {  
-                    sh "sudo docker tag ${ECR_REPO_NAME}:${env.BRANCH_NAME}-${env.BUILD_NUMBER} ${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO_NAME}:${env.BRANCH_NAME}-${env.BUILD_NUMBER}"
-                }
-            }
-        }
-        stage('Push to AWS ECR') {
-            steps {
-                withCredentials([[
-                    $class: 'AmazonWebServicesCredentialsBinding',
-                    credentialsId: 'aws-credentials-id' // Use your AWS credentials ID
-                ]]) 
-                {
-                    // Log in to AWS ECR
-                    sh """
-                        aws ecr get-login-password --region ${AWS_REGION} | \
-                        sudo docker login --username AWS --password-stdin ${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
-                    """
-
-                    // Push the Docker image
-                    sh "sudo docker push ${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO_NAME}:${env.BRANCH_NAME}-${env.BUILD_NUMBER}"        
-                }
-            }
-        }  
- 
-        stage('Deploy') {
-            when {
-                branch 'test'
-            }
-            steps { 
                 script {
-                    withCredentials([sshUserPrivateKey(credentialsId: 'ubuntu-aws', keyFileVariable: 'SSH_KEY')]) {
-                        sh """
-                            ssh -o StrictHostKeyChecking=no -i ${SSH_KEY} ${DEPLOY_USER}@${DEPLOY_SERVER} bash -c '
-                            sudo docker pull ${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO_NAME}:${env.BRANCH_NAME}-${env.BUILD_NUMBER}
-                            sudo docker run -d --name simple-nodejs -p 3000:3000 ${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO_NAME}:${env.BRANCH_NAME}-${env.BUILD_NUMBER} 
-                            '
-                        """
+                    withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', passwordVariable: 'DOCKER_HUB_PASSWORD', usernameVariable: 'DOCKER_HUB_USERNAME')]) {
+                        sh "echo ${DOCKER_HUB_PASSWORD} | docker login -u ${DOCKER_HUB_USERNAME} --password-stdin"
+                        sh "docker push ${DOCKER_IMAGE_NAME}:${env.BRANCH_NAME}-${env.BUILD_NUMBER}"
+                        sh "docker tag ${DOCKER_IMAGE_NAME}:${env.BRANCH_NAME}-${env.BUILD_NUMBER} ${DOCKER_IMAGE_NAME}:${env.BRANCH_NAME}-latest"
+                        sh "docker push ${DOCKER_IMAGE_NAME}:${env.BRANCH_NAME}-latest"
                     }
                 }
             } 
@@ -83,7 +46,8 @@ pipeline {
         always {
             script {
                 try {
-                    sh "sudo docker rmi ${ECR_REPO_NAME}:${IMAGE_TAG}-${env.BUILD_NUMBER}"
+                    sh "sudo docker rmi ${DOCKER_IMAGE_NAME}:${env.BRANCH_NAME}-${env.BUILD_NUMBER}"
+                    sh "sudo docker rmi ${DOCKER_IMAGE_NAME}:${env.BRANCH_NAME}-latest"
                 } catch (Exception e) {
                     echo 'Failed to remove Docker image.'
                 }
