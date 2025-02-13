@@ -8,7 +8,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git branch: ${env.BRANCH_NAME}, url: 'https://github.com/LisandroLuna/simple-nodejs.git'
+                git branch: "${env.BRANCH_NAME}", url: 'https://github.com/LisandroLuna/simple-nodejs.git'
             }
         }
 
