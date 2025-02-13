@@ -23,7 +23,7 @@ pipeline {
         stage('Test') {
             steps {
                 script {
-                    sh "sudo docker run --rm ${DOCKER_IMAGE_NAME}:${env.BUILD_NUMBER} npm test"
+                    sh "docker run --rm ${DOCKER_IMAGE_NAME}:${env.BUILD_NUMBER} npm test"
                 }
             }
         }
