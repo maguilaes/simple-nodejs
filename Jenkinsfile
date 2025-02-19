@@ -4,7 +4,7 @@ pipeline {
     environment {
         DOCKER_IMAGE_NAME = "lisandrodev/simple-nodejs"
     }
-
+    
     stages {
         stage('Checkout') {
             steps {
