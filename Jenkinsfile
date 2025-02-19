@@ -13,10 +13,10 @@ pipeline {
         }
 
         stage('Build Docker Image') {
-            steps {
+            steps { 
                 script {
                     sh "docker build -t ${DOCKER_IMAGE_NAME}:${env.BRANCH_NAME}-${env.BUILD_NUMBER} ."
-                }
+                } 
             }
         }
 
