@@ -62,6 +62,17 @@ pipeline {
                 }
             }
         }
+        
+        stage('Deploy Approval') {
+            when {
+                branch 'main'
+            }
+            steps {
+                script {
+                    input message: 'Deploy to production?', ok: 'Yes, deploy'
+                }
+            }
+        }
     
         stage('Deploy PROD') {    
             when {
