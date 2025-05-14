@@ -43,7 +43,7 @@ pipeline {
             } 
         }
     
-        stage('Deploy TEST') {
+    /*    stage('Deploy TEST') {
             when {
                 branch 'test'
             }
@@ -106,5 +106,6 @@ pipeline {
                 }
             }
         }
+    }*/
     }
 }
