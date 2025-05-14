@@ -42,6 +42,18 @@ pipeline {
                 }
             } 
         }
+        
+        post {
+        always {
+            script {
+                try {
+                    sh "sudo docker rmi ${DOCKER_IMAGE_NAME}:${env.BRANCH_NAME}-${env.BUILD_NUMBER}"
+                    sh "sudo docker rmi ${DOCKER_IMAGE_NAME}:${env.BRANCH_NAME}-latest"
+                } catch (Exception e) {
+                    echo 'Failed to remove Docker image.'
+                }
+            }
+        }
     
     /*    stage('Deploy TEST') {
             when {
@@ -95,17 +107,7 @@ pipeline {
         }
     }   
 
-    post {
-        always {
-            script {
-                try {
-                    sh "sudo docker rmi ${DOCKER_IMAGE_NAME}:${env.BRANCH_NAME}-${env.BUILD_NUMBER}"
-                    sh "sudo docker rmi ${DOCKER_IMAGE_NAME}:${env.BRANCH_NAME}-latest"
-                } catch (Exception e) {
-                    echo 'Failed to remove Docker image.'
-                }
-            }
-        }
+   
     }*/
     }
 }
