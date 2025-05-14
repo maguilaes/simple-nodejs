@@ -44,70 +44,16 @@ pipeline {
         }
         
         post {
-        always {
-            script {
-                try {
-                    sh "sudo docker rmi ${DOCKER_IMAGE_NAME}:${env.BRANCH_NAME}-${env.BUILD_NUMBER}"
-                    sh "sudo docker rmi ${DOCKER_IMAGE_NAME}:${env.BRANCH_NAME}-latest"
-                } catch (Exception e) {
-                    echo 'Failed to remove Docker image.'
-                }
-            }
-        }
-    
-    /*    stage('Deploy TEST') {
-            when {
-                branch 'test'
-            }
-            steps {
+            always {
                 script {
-                    withCredentials([sshUserPrivateKey(credentialsId: 'ssh-user-aws', keyFileVariable: 'SSH_KEY')]) {
-                        sh """
-                            ssh -o StrictHostKeyChecking=no -i ${SSH_KEY} ${DEPLOY_USER}@${DEPLOY_SERVER} bash -c '
-                                docker pull ${DOCKER_IMAGE_NAME}:${env.BRANCH_NAME}-${env.BUILD_NUMBER}
-                                docker stop simple-nodejs || true
-                                docker rm simple-nodejs || true
-                                docker run -d --name simple-nodejs -p 3000:3000 ${DOCKER_IMAGE_NAME}:${env.BRANCH_NAME}-${env.BUILD_NUMBER}
-                            '
-                        """
+                    try {
+                        sh "sudo docker rmi ${DOCKER_IMAGE_NAME}:${env.BRANCH_NAME}-${env.BUILD_NUMBER}"
+                        sh "sudo docker rmi ${DOCKER_IMAGE_NAME}:${env.BRANCH_NAME}-latest"
+                    } catch (Exception e) {
+                        echo 'Failed to remove Docker image.'
                     }
                 }
             }
         }
-        
-        stage('Deploy Approval') {
-            when {
-                branch 'main'
-            }
-            steps {
-                script {
-                    input message: 'Deploy to production?', ok: 'Yes, deploy'
-                }
-            }
-        }
-    
-        stage('Deploy PROD') {    
-            when { 
-                branch 'main'
-            }
-            steps {
-                script {
-                    withCredentials([sshUserPrivateKey(credentialsId: 'ssh-user-aws', keyFileVariable: 'SSH_KEY')]) {
-                        sh """
-                            ssh -o StrictHostKeyChecking=no -i ${SSH_KEY} ${DEPLOY_USER}@${DEPLOY_SERVER} bash -c '
-                                docker pull ${DOCKER_IMAGE_NAME}:${env.BRANCH_NAME}-${env.BUILD_NUMBER}
-                                docker stop simple-nodejs || true
-                                docker rm simple-nodejs || true
-                                docker run -d --name simple-nodejs -p 3000:3000 ${DOCKER_IMAGE_NAME}:${env.BRANCH_NAME}-${env.BUILD_NUMBER}
-                            '
-                        """
-                    }
-                }
-            }
-        }
-    }   
-
-   
-    }*/
     }
 }
