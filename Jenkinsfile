@@ -3,8 +3,8 @@ pipeline {
 
     environment {
         DOCKER_IMAGE_NAME = "maguilaes/simple-nodejs"
-        DEPLOY_SERVER = "34.230.73.120"
-        DEPLOY_USER = "ubuntu"
+        //DEPLOY_SERVER = "34.230.73.120"
+        //DEPLOY_USER = "ubuntu"
     }
     
     stages {
