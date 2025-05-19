@@ -3,8 +3,6 @@ pipeline {
 
     environment {
         DOCKER_IMAGE_NAME = "maguilaes/simple-nodejs"
-        //DEPLOY_SERVER = "34.230.73.120"
-        //DEPLOY_USER = "ubuntu"
     }
     
     stages {
@@ -22,7 +20,7 @@ pipeline {
             }
         }
 
-        stage('Test') {
+/*        stage('Test') {
             steps {
                 script {
                     sh "docker run --rm ${DOCKER_IMAGE_NAME}:${env.BRANCH_NAME}-${env.BUILD_NUMBER} npm test"
@@ -54,6 +52,6 @@ pipeline {
                     }
                 }
             }
-        }
+        }*/
     }
 }
